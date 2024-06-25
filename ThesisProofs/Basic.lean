@@ -1029,20 +1029,21 @@ prudent ((Proposition_12_B interlub interglb).ωSup chain).val.1 ((Proposition_1
 
   have a_le_infb : ∀ i : ℕ, (chain i).val.1 ≤ cₛᵤₚ.val.2.val := by
     intro i
+    have ai_le_cₛᵤₚ₁ := (ωCompletePoset.le_ωSup chain i).1
     exact O.le_trans (chain i).val.1 cₛᵤₚ.val.1 cₛᵤₚ.val.2.val (ωCompletePoset.le_ωSup chain i).1 supa_le_infb
 
-  have NatClassical : ∀ a : ℕ, ∀ b : ℕ, a ≤ b ∨ b < a := by
-    intro a b
-    apply Or.elim (Classical.em (a ≤ b))
-    .
-      intro h
-      apply Or.inl h
-    .
-      intro h
-      apply Or.inr (Nat.lt_of_not_le h)
+  have a_le_b : ∀ i, ∀ κ, (chain i).val.1 ≤ (chain κ).val.2.val := by
+    intro i κ
+    -- very bκ is greater than cₛᵤₚ.val.2
+    have cₛᵤₚ₂_le_bκ := (ωCompletePoset.le_ωSup chain κ).2
+    -- by trans ai cₛᵤₚ.val.2 bκ
+    exact O.le_trans (chain i).val.1 cₛᵤₚ.val.2.val (chain κ).val.2 (a_le_infb i) cₛᵤₚ₂_le_bκ
 
+  have a_le_infb : ∀ i : ℕ, (chain i).val.1 ≤ cₛᵤₚ.val.2.val := by
+    intro i
+    exact O.le_trans (chain i).val.1 cₛᵤₚ.val.1 cₛᵤₚ.val.2.val (ωCompletePoset.le_ωSup chain i).1 supa_le_infb
 
-  have r1 : ∀ i, ∀ κ,  ((chain i).val.1, (chain κ).val.2) ≲ ((chain i).val.1, cₛᵤₚ.val.2) := by
+  have r1 : ∀ i, ∀ κ, ((chain i).val.1, (chain κ).val.2) ≲ ((chain i).val.1, cₛᵤₚ.val.2) := by
     intro i κ
     apply And.intro
     .
@@ -1050,29 +1051,9 @@ prudent ((Proposition_12_B interlub interglb).ωSup chain).val.1 ((Proposition_1
     .
       exact (ωCompletePoset.le_ωSup chain κ).2
 
-  have a_le_b : ∀ u : ℕ, ∀ κ : ℕ, (chain κ).val.1 ≤ (chain u).val.2.val := by
-    intro u κ
-    apply (NatClassical u κ).elim
-    .
-      intro h
-      have t1 : (chain κ).val.1 ≤ (chain κ).val.2.val :=
-        (chain κ).prop
-      --{α : Type u_2} {β : Type u_3} [inst✝ : Preorder α] [inst✝¹ : Preorder β] (f : α →o β)
-      have t2 : (chain u) ≤ (chain κ) :=
-        (@OrderHom.monotone _ _ _ (_) chain) h
-      have t3 : (chain κ).val.2.val ≤ (chain u).val.2 :=
-        t2.2
-      exact O.le_trans (chain κ).val.1 (chain κ).val.2.val (chain u).val.2 t1 t3
-    .
-      intro h
-      have t1 : (chain u).val.1 ≤ (chain u).val.2.val :=
-        (chain u).prop
-      have t2 : (chain κ) ≤ (chain u).val :=
-         (@OrderHom.monotone _ _ _ (_) chain) (le_of_lt h)
-      have t3 : (chain κ).val.1 ≤ (chain u).val.1 :=
-        t2.1
-      exact O.le_trans (chain κ).val.1 (chain u).val.1 (chain u).val.2.val t3 t1
+  have r2 : ∀ i, ∀ κ, A ⟨((chain i).val.1, (chain κ).val.2), a_le_b i κ⟩ ≲ (A ⟨((chain i).val.1, cₛᵤₚ.val.2), a_le_infb i⟩).val  := by
+    intro i κ
+    exact conA ⟨((chain i).val.1, (chain κ).val.2), a_le_b i κ⟩ ⟨((chain i).val.1, cₛᵤₚ.val.2), a_le_infb i⟩ (r1 i κ)
 
-  -- have r2 : ∀ i, ∀ κ, A ⟨((chain i).val.1, (chain κ).val.2), a_le_b κ i⟩ ≲ A ⟨((chain i).val.1, cₛᵤₚ.val.2), a_le_infb i⟩  :=
-  --   sorry
+
   sorry
