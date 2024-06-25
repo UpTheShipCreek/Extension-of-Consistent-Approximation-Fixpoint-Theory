@@ -984,16 +984,22 @@ OmegaCompletePartialOrder {x : Subtype D1 × Subtype D2 | ⊗x} :=
 }
 
 
--- (A_prudent : prudent a b interlub ab A conA A_reliable)
--- (A_reliable : reliable A ⟨(a,b), ab⟩)
-def Proposition_13 {D : Type u} {D1 D2 : D → Prop} [O : PartialOrder D] [BoundedPartialOrder D] [L1 : CompleteLatticeFromOrder (Subtype D1)] [L2 : CompleteLatticeFromOrder (Subtype D2)] (interlub : interlattice_lub D D1 D2) (interglb : interlattice_glb D D1 D2)
+def Proposition_13_A {D : Type u} {D1 D2 : D → Prop} [O : PartialOrder D] [BoundedPartialOrder D] [L1 : CompleteLatticeFromOrder (Subtype D1)] [L2 : CompleteLatticeFromOrder (Subtype D2)] (interlub : interlattice_lub D D1 D2) (interglb : interlattice_glb D D1 D2)
 (chain : @OmegaCompletePartialOrder.Chain {x : Subtype D1 × Subtype D2 | ⊗x} (@InfoPoset _ _ _ O).toPreorder)
 (A : {x : Subtype D1 × Subtype D2 // ⊗x} → {x : Subtype D1 × Subtype D2 // ⊗x}) (conA : consistent_approximating_operator A)
 (A_reliable : ∀ i, (reliable A ⟨((chain i).val.1, (chain i).val.2), (chain i).prop⟩))
-(prudent_chain : ∀ i, prudent (chain i).val.1 (chain i).val.2 interlub (chain i).prop A conA (A_reliable i)) : Prop := by
+(prudent_chain : ∀ i, prudent (chain i).val.1 (chain i).val.2 interlub (chain i).prop A conA (A_reliable i)) :
+(reliable A ((Proposition_12_B interlub interglb).ωSup chain))
+:= by
   let ωCompletePoset := Proposition_12_B interlub interglb
 
-  --let kl := --ωCompletePoset.ωSup chain -- ERROR HERE
+  let kl := (ωCompletePoset.ωSup chain).prop
   sorry
 
--- ⟨((chain i).val.1, (chain i).val.2), (chain i).prop⟩
+def Proposition_13_B {D : Type u} {D1 D2 : D → Prop} [O : PartialOrder D] [BoundedPartialOrder D] [L1 : CompleteLatticeFromOrder (Subtype D1)] [L2 : CompleteLatticeFromOrder (Subtype D2)] (interlub : interlattice_lub D D1 D2) (interglb : interlattice_glb D D1 D2)
+(chain : @OmegaCompletePartialOrder.Chain {x : Subtype D1 × Subtype D2 | ⊗x} (@InfoPoset _ _ _ O).toPreorder)
+(A : {x : Subtype D1 × Subtype D2 // ⊗x} → {x : Subtype D1 × Subtype D2 // ⊗x}) (conA : consistent_approximating_operator A)
+(A_reliable : ∀ i, (reliable A ⟨((chain i).val.1, (chain i).val.2), (chain i).prop⟩))
+(prudent_chain : ∀ i, prudent (chain i).val.1 (chain i).val.2 interlub (chain i).prop A conA (A_reliable i)) :
+prudent ((Proposition_12_B interlub interglb).ωSup chain).val.1 ((Proposition_12_B interlub interglb).ωSup chain).val.2 interlub ((Proposition_12_B interlub interglb).ωSup chain).prop A conA (Proposition_13_A interlub interglb chain A conA A_reliable prudent_chain) :=
+  sorry
