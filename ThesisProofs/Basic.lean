@@ -991,8 +991,12 @@ def Proposition_13_A {D : Type u} {D1 D2 : D → Prop} [O : PartialOrder D] [Bou
 :
 (reliable A ((Proposition_12_B interlub interglb).ωSup chain))
 := by
+
   let ωCompletePoset := Proposition_12_B interlub interglb
   let cₛᵤₚ := (ωCompletePoset.ωSup chain)
+
+  let aₗₛ := cₛᵤₚ.val.1
+  let bₗₛ := cₛᵤₚ.val.2
 
   have cₛᵤₚ_ub : ∀ i, (chain i).val ≲ cₛᵤₚ := by
     intro i
@@ -1006,7 +1010,7 @@ def Proposition_13_A {D : Type u} {D1 D2 : D → Prop} [O : PartialOrder D] [Bou
   have Acₛᵤₚ_ub : ∀ i, (chain i).val ≲ (A cₛᵤₚ).val := by
     intro i
     -- proof that A ⟨(chain i).val, (chain i).prop⟩ ≤ (A cₛᵤₚ).val
-    have t1 := conA ⟨(chain i).val, (chain i).prop⟩ ⟨(cₛᵤₚ.val.1, cₛᵤₚ.val.2), cₛᵤₚ.prop⟩ (cₛᵤₚ_ub i)
+    have t1 := conA ⟨(chain i).val, (chain i).prop⟩ ⟨(aₗₛ, bₗₛ), cₛᵤₚ.prop⟩ (cₛᵤₚ_ub i)
     exact ωCompletePoset.le_trans ⟨(chain i).val, (chain i).prop⟩ (A ⟨(chain i).val, (chain i).prop⟩) (A ⟨cₛᵤₚ, cₛᵤₚ.prop⟩) (t i) t1
 
   have cₛᵤₚ_le_Acₛᵤₚ : cₛᵤₚ ≲ (A cₛᵤₚ).val := by
@@ -1019,41 +1023,106 @@ def Proposition_13_B {D : Type u} {D1 D2 : D → Prop} [O : PartialOrder D] [Bou
 (chain : @OmegaCompletePartialOrder.Chain {x : Subtype D1 × Subtype D2 | ⊗x} (@InfoPoset _ _ _ O).toPreorder)
 (A : {x : Subtype D1 × Subtype D2 // ⊗x} → {x : Subtype D1 × Subtype D2 // ⊗x}) (conA : consistent_approximating_operator A)
 (A_reliable : ∀ i, (reliable A ⟨((chain i).val.1, (chain i).val.2), (chain i).prop⟩))
-(prudent_chain : ∀ i, prudent (chain i).val.1 (chain i).val.2 interlub (chain i).prop A conA (A_reliable i)) :
+(prudent_chain : ∀ i, prudent (chain i).val.1 (chain i).val.2 interlub (chain i).prop A conA (A_reliable i)) (κ : ℕ) :
 prudent ((Proposition_12_B interlub interglb).ωSup chain).val.1 ((Proposition_12_B interlub interglb).ωSup chain).val.2 interlub ((Proposition_12_B interlub interglb).ωSup chain).prop A conA (Proposition_13_A interlub interglb chain A conA A_reliable) :=
   let ωCompletePoset := Proposition_12_B interlub interglb
   let cₛᵤₚ := (ωCompletePoset.ωSup chain)
   let cₛᵤₚ_Aᵣₑ := Proposition_13_A interlub interglb chain A conA A_reliable
 
+  let cₖ := chain κ
+  let aₖ := cₖ.val.1
+  let bₖ := cₖ.val.2
+
+  let aₗₛ := cₛᵤₚ.val.1
+  let bₗₛ := cₛᵤₚ.val.2
+
+  let CLbₖ := Proposition_8_A bₖ interlub
+  let CLbₗₛ := Proposition_8_A bₗₛ interlub
+
+  --(A1_OrderHom a b interlub ab A conA A_reliable)
+  let A₁ := A1_OrderHom aₖ bₖ interlub cₖ.prop A conA (A_reliable κ)
+  let A₁ₛ := A1_OrderHom aₗₛ bₗₛ interlub cₛᵤₚ.prop A conA cₛᵤₚ_Aᵣₑ
+
+  let lfpbₖ := rOb aₖ bₖ interlub cₖ.prop A conA (A_reliable κ)
+  let lfpbₗₛ := rOb aₗₛ bₗₛ interlub cₛᵤₚ.prop A conA cₛᵤₚ_Aᵣₑ
+
+  have lfpbₖ_in : lfpbₖ ∈ {x | A₁ x ≤ x} ∧ lfpbₖ ∈ lowerBounds {x | A₁ x ≤ x} :=
+    (@OrderHom.isLeast_lfp_le {x // (boundedSubtype _ _ _ D1 ⊥ bₖ) x} CLbₖ A₁)
+
+  have lfpbₗₛ_in : lfpbₗₛ ∈ {x | A₁ₛ x ≤ x} ∧ lfpbₗₛ ∈ lowerBounds {x | A₁ₛ x ≤ x} :=
+    (@OrderHom.isLeast_lfp_le {x // (boundedSubtype _ _ _ D1 ⊥ bₗₛ) x} CLbₗₛ A₁ₛ)
+
+  have P10 := Proposition_10 aₗₛ bₗₛ interlub interglb cₛᵤₚ.prop A conA cₛᵤₚ_Aᵣₑ
+
   have supa_le_infb := Proposition_12_A interlub interglb chain
 
-  have a_le_infb : ∀ i : ℕ, (chain i).val.1 ≤ cₛᵤₚ.val.2.val := by
+  have a_le_infb : ∀ i : ℕ, (chain i).val.1 ≤ bₗₛ.val := by
     intro i
     have ai_le_cₛᵤₚ₁ := (ωCompletePoset.le_ωSup chain i).1
-    exact O.le_trans (chain i).val.1 cₛᵤₚ.val.1 cₛᵤₚ.val.2.val (ωCompletePoset.le_ωSup chain i).1 supa_le_infb
+    exact O.le_trans (chain i).val.1 aₗₛ bₗₛ.val (ωCompletePoset.le_ωSup chain i).1 supa_le_infb
 
-  have a_le_b : ∀ i, ∀ κ, (chain i).val.1 ≤ (chain κ).val.2.val := by
-    intro i κ
-    -- very bκ is greater than cₛᵤₚ.val.2
-    have cₛᵤₚ₂_le_bκ := (ωCompletePoset.le_ωSup chain κ).2
-    -- by trans ai cₛᵤₚ.val.2 bκ
-    exact O.le_trans (chain i).val.1 cₛᵤₚ.val.2.val (chain κ).val.2 (a_le_infb i) cₛᵤₚ₂_le_bκ
-
-  have a_le_infb : ∀ i : ℕ, (chain i).val.1 ≤ cₛᵤₚ.val.2.val := by
+  have a_le_b : ∀ i, (chain i).val.1 ≤ bₖ.val := by
     intro i
-    exact O.le_trans (chain i).val.1 cₛᵤₚ.val.1 cₛᵤₚ.val.2.val (ωCompletePoset.le_ωSup chain i).1 supa_le_infb
+    -- very bκ is greater than bₗₛ
+    have cₛᵤₚ₂_le_bₖ := (ωCompletePoset.le_ωSup chain κ).2
+    -- by trans ai bₗₛ bκ
+    exact O.le_trans (chain i).val.1 bₗₛ.val bₖ (a_le_infb i) cₛᵤₚ₂_le_bₖ
 
-  have r1 : ∀ i, ∀ κ, ((chain i).val.1, (chain κ).val.2) ≲ ((chain i).val.1, cₛᵤₚ.val.2) := by
-    intro i κ
+  have a_le_b' : ∀ a ∈ {(chain i).val.1 | i : ℕ}, a ≤ bₖ.val :=
+    λ a ⟨i, ci_eq_a⟩ => ci_eq_a ▸ a_le_b i
+
+  have a_le_infb : ∀ i : ℕ, (chain i).val.1 ≤ bₗₛ.val := by
+    intro i
+    exact O.le_trans (chain i).val.1 aₗₛ bₗₛ.val (ωCompletePoset.le_ωSup chain i).1 supa_le_infb
+
+  have a_le_infb' : ∀ a ∈ {(chain i).val.1 | i : ℕ}, a ≤ bₗₛ.val :=
+    λ a ⟨i, ci_eq_a⟩ => ci_eq_a ▸ a_le_infb i
+
+  have r1 : ∀ i, ((chain i).val.1, bₖ) ≲ ((chain i).val.1, bₗₛ) := by
+    intro i
     apply And.intro
     .
       rfl
     .
       exact (ωCompletePoset.le_ωSup chain κ).2
 
-  have r2 : ∀ i, ∀ κ, A ⟨((chain i).val.1, (chain κ).val.2), a_le_b i κ⟩ ≲ (A ⟨((chain i).val.1, cₛᵤₚ.val.2), a_le_infb i⟩).val  := by
-    intro i κ
-    exact conA ⟨((chain i).val.1, (chain κ).val.2), a_le_b i κ⟩ ⟨((chain i).val.1, cₛᵤₚ.val.2), a_le_infb i⟩ (r1 i κ)
+  have r2 : ∀ i, A ⟨((chain i).val.1, bₖ), a_le_b i⟩ ≲ (A ⟨((chain i).val.1, bₗₛ), a_le_infb i⟩).val  := by
+    intro i
+    exact conA ⟨((chain i).val.1, bₖ), a_le_b i⟩ ⟨((chain i).val.1, bₗₛ), a_le_infb i⟩ (r1 i)
 
+  have r2' : ∀ x : {(chain i).val.1 | i : ℕ}, A ⟨(x, bₖ), a_le_b' x x.prop⟩ ≲ (A ⟨(x, bₗₛ), a_le_infb' x x.prop⟩).val := by
+    intro x
+    let ⟨i, eq⟩ := x.prop
+    have indexed_proof := r2 i
+    simp_rw [eq] at indexed_proof
+    exact indexed_proof
+
+  have r3 := λ i => (r2 i).1
+
+  -- every prefixpoint of A(·, bₗₛ) is a prefixpoint of A(·, bₖ)
+
+  -- for this I need a proof that x \<= bₗₛ then x <= bₖ
+  have r4 : ∀ (x : D), x ≤ bₗₛ → x ≤ bₖ := by
+    intro x x_le_bₗₛ
+    exact O.le_trans x bₗₛ bₖ x_le_bₗₛ (ωCompletePoset.le_ωSup chain κ).2
+  -- and a proof that x ∈ {x | A₁ₛ x ≤ x} then A₁ x ≤ x
+  have r5 : ∀ x : Subtype (boundedSubtype D D1 D2 D1 ⊥ bₗₛ), x.val ∈ {(chain i).val.1 | i : ℕ} ∧ A₁ₛ x ≤ x → A₁ ⟨x, ⟨L1.bot_le x, r4 x x.prop.2⟩⟩ ≤ x.val := by
+    intro x ⟨x_in , x_preA₁ₛ⟩
+    have A₁_le_A₁ₛ := (r2' ⟨x, x_in⟩).1
+    exact O.le_trans (A ⟨(x, bₖ), a_le_b' x x_in⟩).val.1 (A ⟨(x, bₗₛ), a_le_infb' x x_in⟩).val.1 x A₁_le_A₁ₛ x_preA₁ₛ
+
+  -- need a proof that A₁ₛ lfpbₗₛ ≤ lfpbₗₛ
+  have r5' : lfpbₗₛ ∈ {x | A₁ₛ x ≤ x} := by
+    tauto
+  -- and a proof that lfpbₗₛ ∈ {(chain i).val.1 | i : ℕ}
+
+  have r6 : A₁ ⟨lfpbₗₛ, ⟨L1.bot_le lfpbₗₛ, O.le_trans lfpbₗₛ bₗₛ bₖ P10.1 (ωCompletePoset.le_ωSup chain κ).2⟩⟩ ≤ ⟨lfpbₗₛ, ⟨L1.bot_le lfpbₗₛ, O.le_trans lfpbₗₛ bₗₛ bₖ P10.1 (ωCompletePoset.le_ωSup chain κ).2⟩⟩ := by
+    exact r5 lfpbₗₛ ⟨sorry, r5'⟩
+
+  have r8 : ∀ x, A₁ x ≤ x → lfpbₖ ≤ x.val := by
+    exact lfpbₖ_in.2
+
+  have r9 : lfpbₖ ≤ lfpbₗₛ.val := by
+    exact r8 ⟨lfpbₗₛ, ⟨L1.bot_le lfpbₗₛ, O.le_trans lfpbₗₛ bₗₛ bₖ P10.1 (ωCompletePoset.le_ωSup chain κ).2⟩⟩ r6
 
   sorry
